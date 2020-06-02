@@ -8,7 +8,6 @@ import {
   Text,
   SafeAreaView,
   FlatList,
-  ActivityIndicator,
 } from 'react-native';
 import {styles} from './style';
 import {textView} from '../../ui/textView';
@@ -16,57 +15,23 @@ import SearchBar from './SearchItems/index';
 import DetailItem from './DetailItems/index';
 import * as string from '../../resources/string';
 import ItemsType from './itemsType/index';
-import * as firebaseService from '../../service/firebaseAPI';
+
 const index = () => {
-  const [inputSearch, setInputSearch] = useState('');
   const [searchResult, setSearchResult] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [items, setItems] = useState([]);
-  const [limit, setLimit] = useState(string.INITIALIZED_ITEMS);
   const [visible, setVisible] = useState(false);
   const [detailItem, setDetailItem] = useState({});
   const [typeName, setTypeName] = useState('');
-
-  useEffect(() => {
-    setLoading(true);
-    getItemsByType();
-  }, [getItemsByType, limit, typeName]);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const getItemsByType = async () => {
-    if (typeName !== '') {
-      const data = await firebaseService.getItemEachType(limit,typeName);
-      setItems(data);
-      checkMaxLimit(data);
-      setLoading(false);
-    } else {
-      const data = await firebaseService.getItemAllType(limit);
-      setItems(data);
-      checkMaxLimit(data);
-      setLoading(false);
-    }
-  };
 
   const getTypeValue = value => {
     setTypeName(value);
   };
 
-  const checkMaxLimit = data => {
-    if (limit > data.length) {
-      setLimit(data.length);
-    }
-  };
 
-  const getSearchItemResult = (searchItems, textInput) => {
+  const getSearchItemResult = (searchItems) => {
     setSearchResult(searchItems);
-    setInputSearch(textInput);
   };
 
   console.disableYellowBox = true;
-  const retrivedMore = () => {
-    setLimit(limit + string.LOAD_MORE_ITEMS);
-  };
-
   const openModal = item => {
     setVisible(true);
     setDetailItem(item);
@@ -85,18 +50,17 @@ const index = () => {
           <Image
             style={styles.imageNewFeed}
             source={
-              item.imageUri !== ''
-                ? {uri: item.imageUri}
+              item.imageLinks !== undefined
+                ? {uri: item.imageLinks.thumbnail}
                 : require('../../resources/assets/chooseimage.jpg')
             }
             resizeMode="contain"
           />
         </View>
         <View style={styles.columnFlex}>
-          <Text style={textView.txtinfoSecond}>Mã hàng: {item.id}</Text>
-          <Text style={textView.txtinfoSecond}>Tên hàng: {item.name}</Text>
-          <Text style={textView.txtinfoSecond}>Loại: {item.type}</Text>
-          <Text style={textView.txtinfoSecond}>Số lượng: {item.amount}</Text>
+          <Text style={textView.txtinfoSecond}>Title: {item.title}</Text>
+          <Text style={textView.txtinfoSecond}>Author: {item.authors !== undefined || item.authors > 0 ? item.authors : string.NO_INFO}</Text>
+          <Text style={textView.txtinfoSecond}>Page: {item.pageCount !== undefined ? item.pageCount : string.NO_INFO}</Text>
         </View>
 
       </TouchableOpacity>
@@ -107,7 +71,6 @@ const index = () => {
     <SafeAreaView>
       <SearchBar callBackSearchResult={getSearchItemResult} typeName ={typeName}/>
       <View>
-        <ActivityIndicator animating={loading} />
         <DetailItem
           isVisible={visible}
           item={detailItem}
@@ -118,12 +81,10 @@ const index = () => {
           style={styles.itemList}
           data={
             !(searchResult === undefined || searchResult.length === 0)
-              ? searchResult
-              : inputSearch !== '' ? [] : items
+              ? searchResult : []
           }
           keyboardShouldPersistTaps="handled"
           renderItem={renderItems}
-          onEndReached={retrivedMore}
           keyExtractor={(item, index) => index.toString()}
         />
       </View>

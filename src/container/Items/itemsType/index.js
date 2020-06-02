@@ -4,9 +4,9 @@ import {styles} from './style';
 const ItemsType = props => {
   const [value, setValue] = useState('');
   const types = [
-    {Id: 0, Name: 'Tất cả', Value: ''},
-    {Id: 1, Name: 'Áo', Value: 'Áo'},
-    {Id: 2, Name: 'Quần', Value: 'Quần'},
+    {Id: 0, Name: 'All', Value: ''},
+    {Id: 1, Name: 'Free-Ebook', Value: 'Free'},
+    {Id: 2, Name: 'Ebook', Value: 'Ebbok'},
   ];
 
   const setType = item => {
